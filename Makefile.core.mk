@@ -398,7 +398,7 @@ ${ISTIO_OUT}/_istioctl: istioctl
 	mv _istioctl ${ISTIO_OUT}/_istioctl
 
 # Build targets for apps under ./pilot/cmd
-PILOT_BINS:=pilot-discovery pilot-agent
+PILOT_BINS:=pilot-discovery pilot-agent pilot-node-agent
 $(foreach ITEM,$(PILOT_BINS),$(eval $(call genTargetsForNativeAndDocker,$(ITEM),./pilot/cmd/$(ITEM),$(RELEASE_LDFLAGS))))
 
 # Build targets for apps under ./sidecar-injector/cmd
