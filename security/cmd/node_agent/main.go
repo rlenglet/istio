@@ -45,9 +45,9 @@ var (
 func init() {
 	rootCmd.AddCommand(version.CobraCommand())
 	rootCmd.AddCommand(collateral.CobraCommand(rootCmd, &doc.GenManHeader{
-		Title:   "Istio Node Agent",
+		Title:   "Istio Security Node Agent",
 		Section: "node_agent CLI",
-		Manual:  "Istio Node Agent",
+		Manual:  "Istio Security Node Agent",
 	}))
 
 	flags := rootCmd.Flags()

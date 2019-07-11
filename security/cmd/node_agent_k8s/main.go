@@ -417,9 +417,9 @@ func main() {
 
 	rootCmd.AddCommand(version.CobraCommand())
 	rootCmd.AddCommand(collateral.CobraCommand(rootCmd, &doc.GenManHeader{
-		Title:   "Istio Node Agent K8s",
+		Title:   "Istio Security Node Agent K8s",
 		Section: "node_agent_k8s CLI",
-		Manual:  "Istio Node K8s Agent",
+		Manual:  "Istio Security Node K8s Agent",
 	}))
 
 	if err := rootCmd.Execute(); err != nil {
