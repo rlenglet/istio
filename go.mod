@@ -164,6 +164,7 @@ require (
 	k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628
 	k8s.io/cli-runtime v0.0.0-20190221101700-11047e25a94a
 	k8s.io/client-go v10.0.0+incompatible
+	k8s.io/cri-api v0.0.0-20190711114129-0b0c4484b3d3
 	k8s.io/helm v2.13.1+incompatible
 	k8s.io/kubernetes v1.13.1
 	sigs.k8s.io/yaml v1.1.0
