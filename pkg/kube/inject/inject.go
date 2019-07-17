@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"os"
 	"path"
 	"reflect"
 	"strconv"
@@ -797,8 +796,7 @@ func IntoObject(sidecarTemplate string, valuesConfig string, meshconfig *meshcon
 	// affect the network provider within the cluster causing
 	// additional pod failures.
 	if podSpec.HostNetwork {
-		_, _ = fmt.Fprintf(os.Stderr, "Skipping injection because %q has host networking enabled\n",
-			name)
+		log.Infof("Skipping injection because %q has host networking enabled",  name)
 		return out, nil
 	}
 
@@ -806,8 +804,7 @@ func IntoObject(sidecarTemplate string, valuesConfig string, meshconfig *meshcon
 	if len(podSpec.Containers) > 1 {
 		for _, c := range podSpec.Containers {
 			if c.Name == ProxyContainerName {
-				_, _ = fmt.Fprintf(os.Stderr, "Skipping injection because %q has injected %q sidecar already\n",
-					name, ProxyContainerName)
+				log.Infof("Skipping injection because %q has injected %q sidecar already", name, ProxyContainerName)
 				return out, nil
 			}
 		}
