@@ -15,20 +15,32 @@
 package main
 
 import (
+	"context"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
-
 	"istio.io/pkg/collateral"
+	"istio.io/pkg/env"
 	"istio.io/pkg/log"
 	"istio.io/pkg/version"
 
+	"istio.io/istio/pilot/pkg/cri"
+	"istio.io/istio/pilot/pkg/cri/kubeinject"
 	"istio.io/istio/pkg/cmd"
 )
 
 var (
 	loggingOptions = log.DefaultOptions()
+
+	// hostIPVar contains the host's IP address.
+	// It should be set in this pod's spec as:
+	//- name: HOST_IP
+	//  valueFrom:
+	//    fieldRef:
+	//      fieldPath: status.hostIP
+	hostIPVar = env.RegisterStringVar("HOST_IP", "", "")
 
 	rootCmd = &cobra.Command{
 		Use:          "pilot-node-agent",
@@ -47,8 +59,38 @@ var (
 			}
 			log.Infof("Version %s", version.Info.String())
 
-			// Do something.
+			// TODO(rlenglet): Make this configurable.
+			socket := "/var/run/istio-pilot-node-agent.sock"
 
+			// TODO(rlenglet): Make this configurable or auto-detect it.
+			criSocket := "/run/containerd/containerd.sock"
+
+			// TODO(rlenglet): Make this configurable.
+			excludedNamespaces := []string{"kube-system"}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			runtimeServiceClient, imageServiceClient, err := cri.NewClients(ctx, criSocket, criSocket)
+			if err != nil {
+				return err
+			}
+
+			injectionConfigurator := kubeinject.NewConfigurator(&kubeinject.Config{
+				HostIP: hostIPVar.Get(),
+				// TODO(rlenglet): Define a seccomp-profile-root flag.
+				// Cf. https://github.com/kubernetes/kubernetes/blob/c7f9dd0bafe2f3328148a85eed9c18322b9f308e/cmd/kubelet/app/options/options.go#L397
+				SeccompProfileRoot: "",
+			})
+
+			injector := cri.NewInjectorProxy(runtimeServiceClient, imageServiceClient,
+				cri.DefaultLogger, injectionConfigurator, excludedNamespaces)
+
+			s := cri.NewServer(socket, injector, injector)
+			if err := s.Start(); err != nil {
+				return err
+			}
+
+			cmd.WaitSignal(make(chan struct{}))
 			return nil
 		},
 	}
